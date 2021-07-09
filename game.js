@@ -1,5 +1,13 @@
+////////////////////////////
+///// Variable de zone /////
+////////////////////////////
+
 let canvas = document.getElementById("zone");
 let context = canvas.getContext("2d");
+
+///////////////////////////////
+///// Variable de serpent /////
+///////////////////////////////
 
 let largeur = (hauteur = 20);
 
@@ -9,16 +17,22 @@ let y = Math.trunc((Math.random() * canvas.height) / hauteur) * hauteur;
 
 let depX = (depY = 0); /// Variable pour le déplacement au clavier ///
 
+///////////////////////////////
+///// Variables de pommes /////
+///////////////////////////////
 
+let PommeX = Math.trunc((Math.random() * canvas.width) / largeur) * largeur;
+let PommeY = Math.trunc((Math.random() * canvas.height) / hauteur) * hauteur;
+let PommeRadius = 10;
+let score = 0;
+let vie = 3;
 
 /////////////////////////////
 ///// Paramètres du jeu /////
 /////////////////////////////
 
-
-
 let trace = [];
-let tailleTrace = 5;
+let tailleTrace = (tailleInitTrace = 5);
 let sautTrace = 1; /// Pour augmenter la taille de la queue toute les 100 boucles ///
 let tailleMaxTrace = 100; // Cette valeur sera changé plus tard, elle sert à donner une taille maximal autorisé pour la queue
 
@@ -27,12 +41,14 @@ let compteBoucle = 0;
 let sautBoucle = 10;
 
 window.onload = function () {
-  let intervalID = setInterval(game, 100); /// fonction game executé toutes les 10ms ///
+  let intervalID = setInterval(game, 100); /// fonction game executé toutes les 100ms ///
 
   document.addEventListener("keydown", keyboard);
 };
-
+ 
 function game() {
+  /// Paramètre du serpent ///
+
   x += depX * largeur; /// Ajout de "*largeur" et "*hauteur" pour éviter que le serpent se déplace au pixel prêt et rendre plus facile le contact avec les pommes ///
   y += depY * hauteur;
 
@@ -57,18 +73,47 @@ function game() {
 
   context.clearRect(0, 0, canvas.width, canvas.height);
   context.fillStyle = "#f1c40f";
-  for(let i=0;i<trace.length;i++) {
-    context.fillRect(trace[i].x,trace[i].y, largeur -3, hauteur -3);
+  for (let i = 0; i < trace.length; i++) {
+    context.fillRect(trace[i].x, trace[i].y, largeur - 3, hauteur - 3);
+  }
+
+  if (x == PommeX && y == PommeY) {
+    score += 10 + 2 * ((tailleTrace - tailleInitTrace) / sautTrace); //colision
+    if (tailleTrace > tailleInitTrace) {
+      tailleTrace -= sautTrace;
     }
+    // On réinitialise le compte à rebours pour relancer
+    sautBoucle = 10;
+    // Apparition de la pomme à une autre position
+    PommeX = Math.trunc((Math.random() * canvas.width) / largeur) * largeur;
+    PommeY = Math.trunc((Math.random() * canvas.height) / hauteur) * hauteur;
+  }
+
+  /// Paramètre de la pomme ///
+
+  context.beginPath();
+  context.arc(PommeX, PommeY, PommeRadius, 0, Math.PI * 2);
+  context.fillStyle = "#e74c3c";
+  context.fill();
+  context.closePath();
+
+  /// Affichage du score ///
+ 
+  context.font = "16px Arial";
+  context.fillStyle = "#fff";
+  context.fillText("Score: " + score, 5, 20);
+  console.log(score);
+  
+  /// Affichage des vies ///
+
+  context.font = '16px Arial';
+  context.fillStyle = '#fff';
+  context.fillText('Vies restante: ' + vie, canvas.width - 130, 20);
 }
-
-
 
 ///////////////////////////////////////////////
 /// Fonction pour le déplacement au clavier ///
 ///////////////////////////////////////////////
-
-
 
 function keyboard(evt) {
   switch (evt.keyCode) {
